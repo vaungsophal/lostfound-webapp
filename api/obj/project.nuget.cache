@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "QCqyag4o10I=",
+  "success": true,
+  "projectFilePath": "D:\\Project\\lostfound-webapp\\api\\api.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\poe\\.nuget\\packages\\microsoft.aspnetcore.openapi\\10.0.3\\microsoft.aspnetcore.openapi.10.0.3.nupkg.sha512",
+    "C:\\Users\\poe\\.nuget\\packages\\microsoft.openapi\\2.0.0\\microsoft.openapi.2.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}
