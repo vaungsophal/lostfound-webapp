@@ -20,7 +20,7 @@ export interface AuthResponse {
 export class AuthService {
   private http = inject(HttpClient);
   private platformId = inject(PLATFORM_ID);
-  private apiUrl = 'http://localhost:5000/api';
+  private apiUrl = 'http://localhost:5159/api';
 
   private userSignal = signal<User | null>(null);
   private tokenSignal = signal<string | null>(null);

@@ -10,7 +10,7 @@ import { AuthService } from './auth.service';
 export class ApiService {
   private http = inject(HttpClient);
   private authService = inject(AuthService);
-  private apiUrl = 'http://localhost:5000/api';
+  private apiUrl = 'http://localhost:5159/api';
 
   private getAuthHeaders(): HttpHeaders {
     const token = this.authService.getToken();

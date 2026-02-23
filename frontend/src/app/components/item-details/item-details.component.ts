@@ -66,6 +66,9 @@ import { ItemResponse } from '../../models/item.model';
                   <p><strong>Phone:</strong> {{ item()!.contactPhone }}</p>
                 }
                 <p><strong>Email:</strong> {{ item()!.contactEmail }}</p>
+                @if (item()!.contactTelegram) {
+                  <p><strong>Telegram:</strong> @{{ item()!.contactTelegram }}</p>
+                }
               </div>
               <a [href]="'mailto:' + item()!.contactEmail + '?subject=Re: ' + item()!.title" class="contact-btn">
                 Contact Owner
@@ -89,10 +92,10 @@ import { ItemResponse } from '../../models/item.model';
       gap: 15px;
     }
     .page-header.lost {
-      background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+      background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
     }
     .page-header.found {
-      background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%);
+      background: linear-gradient(135deg, #1B3A6B 0%, #0F2340 100%);
     }
     .back-btn {
       color: white;
@@ -105,10 +108,10 @@ import { ItemResponse } from '../../models/item.model';
       flex: 1;
     }
     .status-badge {
-      padding: 6px 14px;
-      border-radius: 15px;
-      font-size: 0.85rem;
-      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 3px;
+      font-size: 0.8rem;
+      font-weight: 700;
       text-transform: uppercase;
     }
     .status-badge.open {
@@ -130,7 +133,7 @@ import { ItemResponse } from '../../models/item.model';
     }
     .image-container {
       background: white;
-      border-radius: 12px;
+      border-radius: 4px;
       overflow: hidden;
       margin-bottom: 20px;
     }
@@ -141,7 +144,7 @@ import { ItemResponse } from '../../models/item.model';
     }
     .details-card {
       background: white;
-      border-radius: 12px;
+      border-radius: 4px;
       padding: 30px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
@@ -180,10 +183,11 @@ import { ItemResponse } from '../../models/item.model';
       line-height: 1.6;
     }
     .contact-card {
-      background: #f8f9fa;
+      background: #e0e7f5;
       padding: 15px;
-      border-radius: 8px;
+      border-radius: 4px;
       margin-bottom: 15px;
+      border-left: 4px solid #1B3A6B;
     }
     .contact-card p {
       margin: 8px 0;
@@ -192,16 +196,19 @@ import { ItemResponse } from '../../models/item.model';
     .contact-btn {
       display: block;
       width: 100%;
-      padding: 14px;
-      background: #667eea;
+      padding: 12px;
+      background: #1B3A6B;
       color: white;
       text-align: center;
       text-decoration: none;
-      border-radius: 8px;
+      border-radius: 3px;
       font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
     }
     .contact-btn:hover {
-      background: #5a6fd6;
+      background: #0F2340;
+      transform: translateY(-1px);
     }
     .loading, .not-found {
       text-align: center;
@@ -212,12 +219,39 @@ import { ItemResponse } from '../../models/item.model';
       margin-bottom: 20px;
     }
     .btn {
-      padding: 12px 28px;
-      background: #667eea;
+      padding: 10px 24px;
+      background: #1B3A6B;
       color: white;
       text-decoration: none;
-      border-radius: 30px;
+      border-radius: 3px;
       font-weight: 600;
+      display: inline-block;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn:hover {
+      background: #0F2340;
+    }
+    @media (max-width: 768px) {
+      .page-header {
+        padding: 16px;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .page-header h1 {
+        font-size: 1.25rem;
+        flex-basis: 100%;
+      }
+      .content {
+        padding: 16px;
+      }
+      .details-card {
+        padding: 20px;
+      }
+      .info-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
     }
   `]
 })

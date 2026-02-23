@@ -9,6 +9,7 @@ export interface Item {
   contactName: string;
   contactPhone: string;
   contactEmail: string;
+  contactTelegram?: string;
   imageUrl?: string;
   status: 'open' | 'claimed' | 'closed';
   userId?: string;
@@ -27,6 +28,7 @@ export interface ItemResponse {
   contactName: string;
   contactPhone: string;
   contactEmail: string;
+  contactTelegram?: string;
   imageUrl?: string;
   status: string;
   userId?: string;

@@ -12,10 +12,17 @@ import { ItemResponse } from '../../models/item.model';
   imports: [CommonModule, FormsModule, RouterLink],
   template: `
     <div class="page">
-      <header class="page-header">
-        <a routerLink="/" class="back-btn">← Back</a>
-        <h1>Post an Item</h1>
-      </header>
+      <nav class="navbar">
+        <div class="nav-container">
+          <a routerLink="/" class="back-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+          </a>
+          <span class="page-title">Post Item</span>
+          <span></span>
+        </div>
+      </nav>
 
       <div class="form-container">
         <div class="type-selector">
@@ -23,107 +30,81 @@ import { ItemResponse } from '../../models/item.model';
             [class.active]="itemType() === 'lost'" 
             (click)="itemType.set('lost')"
             class="type-btn lost"
-          >I Lost Something</button>
+          >
+            Lost
+          </button>
           <button 
             [class.active]="itemType() === 'found'" 
             (click)="itemType.set('found')"
             class="type-btn found"
-          >I Found Something</button>
+          >
+            Found
+          </button>
         </div>
 
         <form (ngSubmit)="submitItem()">
           <div class="form-group">
-            <label>Title *</label>
-            <input 
-              type="text" 
-              [(ngModel)]="form.title" 
-              name="title" 
-              required
-              placeholder="e.g., Blue Backpack with stickers"
-            >
-          </div>
-
-          <div class="form-group">
-            <label>Category *</label>
-            <select [(ngModel)]="form.category" name="category" required>
-              <option value="">Select a category</option>
-              @for (cat of categories; track cat) {
-                <option [value]="cat">{{ cat }}</option>
-              }
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label>Description *</label>
             <textarea 
               [(ngModel)]="form.description" 
               name="description" 
-              required
-              rows="4"
-              placeholder="Describe the item in detail..."
+              rows="3"
+              placeholder="Describe the item..."
             ></textarea>
           </div>
 
           <div class="form-group">
-            <label>Location *</label>
-            <input 
-              type="text" 
-              [(ngModel)]="form.location" 
-              name="location" 
-              required
-              placeholder="e.g., Library, 2nd Floor"
-            >
-          </div>
-
-          <div class="form-group">
-            <label>Date *</label>
             <input 
               type="date" 
               [(ngModel)]="form.date" 
-              name="date" 
-              required
+              name="date"
             >
           </div>
 
           <div class="form-group">
-            <label>Image URL (optional)</label>
-            <input 
-              type="url" 
-              [(ngModel)]="form.imageUrl" 
-              name="imageUrl"
-              placeholder="https://example.com/image.jpg"
-            >
-          </div>
-
-          <h3>Contact Information</h3>
-
-          <div class="form-group">
-            <label>Your Name *</label>
             <input 
               type="text" 
-              [(ngModel)]="form.contactName" 
-              name="contactName" 
-              required
+              [(ngModel)]="form.contactTelegram" 
+              name="contactTelegram"
+              placeholder="Telegram username (optional)"
             >
           </div>
 
           <div class="form-group">
-            <label>Phone Number</label>
-            <input 
-              type="tel" 
-              [(ngModel)]="form.contactPhone" 
-              name="contactPhone"
-            >
-          </div>
-
-          <div class="form-group">
-            <label>Email *</label>
-            <input 
-              type="email" 
-              [(ngModel)]="form.contactEmail" 
-              name="contactEmail" 
-              required
-            >
+            <div class="image-upload">
+              @if (form.imageUrl) {
+                <div class="image-preview">
+                  <img [src]="form.imageUrl" alt="Preview">
+                  <button type="button" class="remove-btn" (click)="removeImage()">Remove</button>
+                </div>
+              } @else {
+                <div class="upload-area" (click)="fileInput.click()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                  </svg>
+                  <span>Click to upload or paste image URL</span>
+                </div>
+              }
+              <input 
+                #fileInput
+                type="file" 
+                accept="image/*"
+                (change)="onImageSelected($event)"
+                style="display: none"
+              >
+              <div class="url-input-wrapper">
+                <input 
+                  type="text"
+                  [(ngModel)]="imageUrlInput" 
+                  name="imageUrl"
+                  placeholder="Or paste image URL"
+                  (keydown.enter)="loadImageFromUrl()"
+                  class="url-input"
+                >
+                <button type="button" (click)="loadImageFromUrl()" class="paste-btn">Load</button>
+              </div>
+            </div>
           </div>
 
           @if (error()) {
@@ -135,7 +116,7 @@ import { ItemResponse } from '../../models/item.model';
           }
 
           <button type="submit" class="submit-btn" [disabled]="submitting()">
-            {{ submitting() ? 'Submitting...' : 'Submit' }}
+            {{ submitting() ? 'Posting...' : 'Post Item' }}
           </button>
         </form>
       </div>
@@ -144,125 +125,252 @@ import { ItemResponse } from '../../models/item.model';
   styles: [`
     .page {
       min-height: 100vh;
-      background: #f5f5f5;
-      padding-bottom: 40px;
+      background: #f8f9fa;
     }
-    .page-header {
-      background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-      padding: 20px;
+
+    .navbar {
+      background: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    .nav-container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 10px 16px;
       display: flex;
       align-items: center;
-      gap: 20px;
+      justify-content: space-between;
     }
-    .back-btn {
-      color: white;
+
+    .back-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 3px;
+      color: #6b7280;
+      background: #f3f4f6;
       text-decoration: none;
+    }
+
+    .back-link svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .page-title {
       font-weight: 600;
+      color: #1a1a2e;
+      font-size: 0.95rem;
     }
-    .page-header h1 {
-      color: white;
-      margin: 0;
-    }
+
     .form-container {
       max-width: 600px;
-      margin: 30px auto;
-      padding: 0 20px;
+      margin: 0 auto;
+      padding: 20px 16px;
     }
+
     .type-selector {
       display: flex;
-      gap: 15px;
-      margin-bottom: 30px;
+      gap: 10px;
+      margin-bottom: 16px;
     }
+
     .type-btn {
       flex: 1;
-      padding: 20px;
-      border: 2px solid #ddd;
-      border-radius: 12px;
+      padding: 10px;
+      border: 2px solid #e5e7eb;
+      border-radius: 3px;
       background: white;
-      font-size: 1.1rem;
+      font-size: 0.85rem;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
+      color: #6b7280;
     }
+
     .type-btn.lost.active {
-      border-color: #e74c3c;
-      background: #e74c3c;
-      color: white;
+      border-color: #DC2626;
+      background: #fee2e2;
+      color: #DC2626;
     }
+
     .type-btn.found.active {
-      border-color: #27ae60;
-      background: #27ae60;
-      color: white;
+      border-color: #1B3A6B;
+      background: #e0e7f5;
+      color: #1B3A6B;
     }
+
     form {
       background: white;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 16px;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      border: 1px solid #e5e7eb;
     }
-    form h3 {
-      margin: 25px 0 15px;
-      color: #333;
-      border-bottom: 1px solid #eee;
-      padding-bottom: 10px;
-    }
+
     .form-group {
-      margin-bottom: 20px;
+      margin-bottom: 12px;
     }
-    .form-group label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 500;
-      color: #333;
-    }
+
     .form-group input,
-    .form-group select,
     .form-group textarea {
       width: 100%;
-      padding: 12px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      font-size: 1rem;
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 3px;
+      font-size: 0.9rem;
       box-sizing: border-box;
+      font-family: inherit;
+      background: #fafafa;
     }
+
     .form-group input:focus,
-    .form-group select:focus,
     .form-group textarea:focus {
       outline: none;
-      border-color: #667eea;
+      border-color: #1B3A6B;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(27, 58, 107, 0.1);
+    }
+
+    .image-upload {
+      position: relative;
+    }
+
+    .upload-area {
+      border: 2px dashed #d1d5db;
+      border-radius: 4px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .upload-area:hover {
+      border-color: #1B3A6B;
+      background: #fafafa;
+    }
+
+    .upload-area svg {
+      width: 28px;
+      height: 28px;
+      color: #9ca3af;
+      margin-bottom: 6px;
+    }
+
+    .upload-area span {
+      display: block;
+      color: #6b7280;
+      font-size: 0.8rem;
+    }
+
+    .image-preview {
+      position: relative;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    .image-preview img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+    }
+
+    .remove-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: #DC2626;
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 2px;
+      font-size: 0.7rem;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .remove-btn:hover {
+      background: #B91C1C;
+    }
+
+    .url-input-wrapper {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .url-input {
+      flex: 1;
+      padding: 8px 10px;
+      border: 1px solid #d1d5db;
+      border-radius: 3px;
+      font-size: 0.8rem;
+      background: #fafafa;
+    }
+
+    .url-input:focus {
+      outline: none;
+      border-color: #1B3A6B;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(27, 58, 107, 0.1);
+    }
+
+    .paste-btn {
+      padding: 8px 12px;
+      background: #1B3A6B;
+      color: white;
+      border: 1px solid #1B3A6B;
+      border-radius: 3px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .paste-btn:hover {
+      background: #0F2340;
     }
     .submit-btn {
       width: 100%;
-      padding: 15px;
-      background: #667eea;
+      padding: 12px;
+      background: #1B3A6B;
       color: white;
       border: none;
-      border-radius: 8px;
-      font-size: 1.1rem;
-      font-weight: 600;
+      border-radius: 3px;
+      font-size: 0.9rem;
+      font-weight: 500;
       cursor: pointer;
-      margin-top: 20px;
+      margin-top: 4px;
     }
+
     .submit-btn:hover:not(:disabled) {
-      background: #5a6fd6;
+      background: #0F2340;
     }
+
     .submit-btn:disabled {
       opacity: 0.6;
       cursor: not-allowed;
     }
+
     .error-message {
-      padding: 12px;
-      background: #fee;
-      color: #c00;
-      border-radius: 8px;
-      margin-bottom: 15px;
+      padding: 10px 12px;
+      background: #fee2e2;
+      color: #DC2626;
+      border-radius: 3px;
+      margin-bottom: 10px;
+      font-size: 0.8rem;
     }
+
     .success-message {
-      padding: 12px;
-      background: #efe;
-      color: #060;
-      border-radius: 8px;
-      margin-bottom: 15px;
+      padding: 10px 12px;
+      background: #e0e7f5;
+      color: #1B3A6B;
+      border-radius: 3px;
+      margin-bottom: 10px;
+      font-size: 0.8rem;
     }
   `]
 })
@@ -276,18 +384,13 @@ export class PostItemComponent implements OnInit {
   error = signal('');
   success = signal('');
 
-  categories = ['Electronics', 'Books', 'Clothing', 'Accessories', 'Sports', 'Keys', 'Wallet', 'Other'];
+  imageUrlInput = '';
 
   form = {
-    title: '',
     description: '',
-    category: '',
-    location: '',
-    date: '',
-    contactName: '',
-    contactPhone: '',
-    contactEmail: '',
-    imageUrl: ''
+    date: new Date().toISOString().split('T')[0],
+    imageUrl: '',
+    contactTelegram: ''
   };
 
   ngOnInit() {
@@ -295,38 +398,88 @@ export class PostItemComponent implements OnInit {
       this.router.navigate(['/login']);
       return;
     }
-    
-    const user = this.authService.user();
-    if (user) {
-      this.form.contactName = user.name;
-      this.form.contactEmail = user.email;
+  }
+
+  onImageSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      
+      // Validate file size (max 5MB)
+      const maxSize = 5 * 1024 * 1024;
+      if (file.size > maxSize) {
+        this.error.set('Image size must be less than 5MB');
+        return;
+      }
+
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        this.error.set('Please select a valid image file');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (e.target?.result) {
+          this.form.imageUrl = e.target.result as string;
+          this.error.set('');
+        }
+      };
+      reader.onerror = () => {
+        this.error.set('Failed to read file');
+      };
+      reader.readAsDataURL(file);
     }
   }
 
+  loadImageFromUrl() {
+    const url = this.imageUrlInput.trim();
+    if (!url) {
+      this.error.set('Please enter a valid URL');
+      return;
+    }
+
+    // Simple URL validation
+    try {
+      new URL(url);
+      this.form.imageUrl = url;
+      this.imageUrlInput = '';
+      this.error.set('');
+    } catch {
+      this.error.set('Invalid URL format');
+    }
+  }
+
+  removeImage() {
+    this.form.imageUrl = '';
+    this.imageUrlInput = '';
+  }
+
   submitItem() {
-    if (!this.form.title || !this.form.category || !this.form.description || 
-        !this.form.location || !this.form.date || !this.form.contactName || 
-        !this.form.contactEmail) {
-      this.error.set('Please fill in all required fields');
+    if (!this.form.description) {
+      this.error.set('Please enter a description');
       return;
     }
 
     this.submitting.set(true);
     this.error.set('');
 
+    const user = this.authService.user();
+
     const item: ItemResponse = {
-      title: this.form.title,
+      title: this.form.description.substring(0, 50) + (this.form.description.length > 50 ? '...' : ''),
       description: this.form.description,
-      category: this.form.category,
-      location: this.form.location,
+      category: 'Other',
+      location: 'Not specified',
       date: this.form.date,
       type: this.itemType(),
-      contactName: this.form.contactName,
-      contactPhone: this.form.contactPhone,
-      contactEmail: this.form.contactEmail,
+      contactName: user?.name || '',
+      contactPhone: '',
+      contactEmail: user?.email || '',
+      contactTelegram: this.form.contactTelegram || undefined,
       imageUrl: this.form.imageUrl || undefined,
       status: 'open',
-      userId: this.authService.user()?.id || ''
+      userId: user?.id || ''
     };
 
     this.apiService.createItem(item).subscribe({
